@@ -154,6 +154,22 @@ int main(int argc, char *argv[]) {
     vector< vector< int > > allIds;
     vector< Mat > allImgs;
     Size imgSize;
+
+    vector< Mat > rvecs, tvecs;
+    //Get calibration datas.
+    Mat camMatrix, distCoeffs;
+
+    FileStorage fs("output.txt", FileStorage::READ);
+    if (!fs.isOpened())
+        return false;
+    fs["camera_matrix"] >> camMatrix;
+    fs["distortion_coefficients"] >> distCoeffs;
+
+    vector<cv::Point3f> markerCorners3d;
+    markerCorners3d.push_back(cv::Point3f(-0.5f, 0.5f, 0));
+    markerCorners3d.push_back(cv::Point3f(0.5f, 0.5f, 0));
+    markerCorners3d.push_back(cv::Point3f(0.5f, -0.5f, 0));
+    markerCorners3d.push_back(cv::Point3f(-0.5f, -0.5f, 0));
  
     while (inputVideo.grab()) {
         Mat image, imageCopy;
@@ -164,6 +180,14 @@ int main(int argc, char *argv[]) {
  
         // detect markers
         aruco::detectMarkers(image, dictionary, corners, ids, detectorParams, rejected);
+
+        
+
+
+
+
+
+        
  
         // refind strategy to detect more markers
         if (refindStrategy) aruco::refineDetectedMarkers(image, board, corners, ids, rejected);
@@ -171,8 +195,7 @@ int main(int argc, char *argv[]) {
         // interpolate charuco corners
         Mat currentCharucoCorners, currentCharucoIds;
         if (ids.size() > 0)
-            aruco::interpolateCornersCharuco(corners, ids, image, charucoboard, currentCharucoCorners,
-                currentCharucoIds);
+            aruco::interpolateCornersCharuco(corners, ids, image, charucoboard, currentCharucoCorners, currentCharucoIds);
  
         // draw results
         image.copyTo(imageCopy);
@@ -201,11 +224,9 @@ int main(int argc, char *argv[]) {
         return 0;
     }
  
-    Mat cameraMatrix, distCoeffs;
-    vector< Mat > rvecs, tvecs;
+
+    /*
     double repError;
-
-
     if (calibrationFlags & CALIB_FIX_ASPECT_RATIO) {
         cameraMatrix = Mat::eye(3, 3, CV_64F);
         cameraMatrix.at< double >(0, 0) = aspectRatio;
@@ -270,6 +291,7 @@ int main(int argc, char *argv[]) {
     cout << "Rep Error: " << repError << endl;
     cout << "Rep Error Aruco: " << arucoRepErr << endl;
     cout << "Calibration saved to " << outputFile << endl;
+    */
 
  
     return 0;
