@@ -26,9 +26,9 @@ message(STATUS "Found OPENGL in ${OPENGL_LIBRARY}")
 find_package( glm REQUIRED )
 message(STATUS "GLM included at ${GLM_INCLUDE_DIRS}")
 
-set(imgui ../libs/imgui_190703)
-set(gl3w ../libs/gl3w_190703)
-set(stb ../libs/stb_190703)
+set(imgui ../../libs/imgui_190703)
+set(gl3w ../../libs/gl3w_190703)
+set(stb ../../libs/stb_190703)
 
 #set(SyeCommon ../../SyeCommon)
 
