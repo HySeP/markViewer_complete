@@ -9,12 +9,14 @@ GLFWwindow* window;
 #include <glm/glm.hpp>
 using namespace glm;
 
+//#include "../../../ogl/common/shader.hpp"
+#include "shader.hpp"
+
 #include "hsCamera.h"
 
 int main( void ) {
 	// Initialise GLFW
-	if( !glfwInit() )
-	{
+	if( !glfwInit() ) {
 		fprintf( stderr, "Failed to initialize GLFW\n" );
 		getchar();
 		return -1;
@@ -53,10 +55,36 @@ int main( void ) {
 
 
 
-
-
 	// Dark blue background
-	glClearColor(0.50f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.0f, 0.40f, 0.0f, 0.0f);
+
+	GLuint VertexArrayID;
+	glGenVertexArrays(1, &VertexArrayID);
+	glBindVertexArray(VertexArrayID);
+
+	// Create and compile our GLSL program from the shaders
+	printf("11111111111\n");
+    GLuint programID = LoadShaders( "../shader/SimpleVertexShader.vertexshader", "../shader/SimpleFragmentShader.fragmentshader" );
+    //GLuint programID = LoadShaders( "../src/SimpleVertexShader.vertexshader", "../src/SimpleFragmentShader.fragmentshader" );
+	printf("22222222222\n");
+
+
+    static const GLfloat g_vertex_buffer_data[] = {
+        -1.0f, -1.0f, 0.0f,
+         1.0f, -1.0f, 0.0f,
+         0.0f,  1.0f, 0.0f,
+    };
+
+    GLuint vertexbuffer;
+    glGenBuffers(1, &vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
+	
+
+		//Use our shader
+	glUseProgram(programID);
+
+
 	do{
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -65,9 +93,29 @@ int main( void ) {
 			//OpenGL camera position setting.
 		//}
 
+		//printf("drawing triangle.\n");
 
 
 		// Draw nothing, see you in tutorial 2 !
+
+        // 1rst attribute buffer : vertices
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glVertexAttribPointer(
+            0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+            3,                  // size
+            GL_FLOAT,           // type
+            GL_FALSE,           // normalized?
+            0,                  // stride
+            (void*)0            // array buffer offset
+        );
+
+        // Draw the triangle !
+        glDrawArrays(GL_TRIANGLES, 0, 3); // 3 indices starting at 0 -> 1 triangle
+
+        glDisableVertexAttribArray(0);
+		
+
 
 		// Swap buffers
 		glfwSwapBuffers(window);
@@ -78,9 +126,12 @@ int main( void ) {
 		   glfwWindowShouldClose(window) == 0 );
 
 
+    // Cleanup VBO
+    glDeleteBuffers(1, &vertexbuffer);
+    glDeleteVertexArrays(1, &VertexArrayID);
 
 
-
+	glDeleteProgram(programID);
 
 
 	delete pUsbCam;

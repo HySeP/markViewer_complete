@@ -31,6 +31,8 @@ set(imgui ../../libs/imgui_190703)
 set(gl3w ../../libs/gl3w_190703)
 set(stb ../../libs/stb_190703)
 
+set(oglTutorial ../../ogl/common)
+
 #set(SyeCommon ../../SyeCommon)
 
 INCLUDE_DIRECTORIES(
@@ -40,6 +42,7 @@ INCLUDE_DIRECTORIES(
 	${gl3w}/include
 	${imgui}
 	${imgui}/examples
+	${oglTutorial}
 )
 
 add_definitions("-Wall" "-g")
@@ -49,6 +52,7 @@ file(GLOB SOURCES
 	${imgui}/*.cpp
 	${imgui}/examples/imgui_impl_glfw.cpp
 	${imgui}/examples/imgui_impl_opengl3.cpp
+	${oglTutorial}/shader.cpp
 	./src/*
 )
 
