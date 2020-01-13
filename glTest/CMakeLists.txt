@@ -31,6 +31,7 @@ set(imgui ../../libs/imgui_190703)
 set(gl3w ../../libs/gl3w_190703)
 set(stb ../../libs/stb_190703)
 
+#https://github.com/opengl-tutorials/ogl.git
 set(oglTutorial ../../ogl/common)
 
 #set(SyeCommon ../../SyeCommon)

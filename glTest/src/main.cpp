@@ -1,18 +1,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 #include <GL/glew.h>
 
 #include <GLFW/glfw3.h>
 GLFWwindow* window;
 
 #include <glm/glm.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 using namespace glm;
 
 //#include "../../../ogl/common/shader.hpp"
+//Using Opengl tutorial git.
 #include "shader.hpp"
 
 #include "hsCamera.h"
+
+
+cv::VideoCapture vc;
+
+bool initCamera(char *paramFile) {
+	return false;
+}
+
+bool getCameraImage(cv::Mat &src) {
+	return false;
+}
 
 int main( void ) {
 	// Initialise GLFW
@@ -68,6 +84,19 @@ int main( void ) {
     //GLuint programID = LoadShaders( "../src/SimpleVertexShader.vertexshader", "../src/SimpleFragmentShader.fragmentshader" );
 	printf("22222222222\n");
 
+	// Get a handle for our "MVP" uniform
+    GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+
+    // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+    // Or, for an ortho camera :
+    //glm::mat4 Projection = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,0.0f,100.0f); // In world coordinates
+
+   	//std::cout << "View matrix = " << std::endl << " "  << View << std::endl << std::endl;
+
+
+
+
 
     static const GLfloat g_vertex_buffer_data[] = {
         -1.0f, -1.0f, 0.0f,
@@ -89,11 +118,61 @@ int main( void ) {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 
+		// Camera matrix
+		/*
+		glm::mat4 View      = glm::lookAt(
+				glm::vec3(4,3,3), // Camera is at (4,3,3), in World Space
+				glm::vec3(0,0,0), // and looks at the origin
+				glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+				);
+		*/
+		//std::cout << "Default " << glm::to_string(View) << std::endl;
+
+
+		// Image grab.
+		// Postion data 추출...
+
+		// CV vector -> glm Vector converting.
+
+
+		glm::mat4 myView = glm::mat4(1.0f);
+		glm::vec3 axis = glm::vec3(0, 1, 0);
+
+		//transfer
+		//myView = glm::translate(myView, glm::vec3(4, 3, 3));
+		myView = glm::translate(myView, glm::vec3(0, 0, -3));
+		//myView = glm::translate(myView, glm::vec3(-3, 0, -5));
+
+		//rotation.
+		myView = glm::rotate(myView, glm::radians(00.0f), glm::vec3(1, 0, 0));	// X axis rotation.
+		myView = glm::rotate(myView, glm::radians( 0.0f), glm::vec3(0, 1, 0));	// y axis rotation.
+		myView = glm::rotate(myView, glm::radians(45.0f), glm::vec3(0, 0, 1));	// z axis rotation.
+		
+
+		//glm::mat4 scale_m = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//glm::mat4 scale_m = glm::scale(myView, glm::vec3(1.0f, 1.0f, 1.0f));
+
+		std::cout << "Default " << glm::to_string(myView) << std::endl;
+
+		// Model matrix : an identity matrix (model will be at the origin)
+		glm::mat4 Model      = glm::mat4(1.0f);
+		// Our ModelViewProjection : multiplication of our 3 matrices
+		//glm::mat4 MVP        = Projection * View * Model; // Remember, matrix multiplication is the other way around
+		glm::mat4 MVP        = Projection * myView * Model; // Remember, matrix multiplication is the other way around
+
+
+
+
 		//if(pUsbCam->getNewImage() && pUsbCam->getCameraPose(tvec, rvec)) {
-			//OpenGL camera position setting.
+		//OpenGL camera position setting.
 		//}
 
 		//printf("drawing triangle.\n");
+
+        // Send our transformation to the currently bound shader,
+        // in the "MVP" uniform
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
 
 
 		// Draw nothing, see you in tutorial 2 !
