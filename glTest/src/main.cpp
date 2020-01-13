@@ -20,15 +20,103 @@ using namespace glm;
 #include "hsCamera.h"
 
 
-cv::VideoCapture vc;
+#include <opencv2/highgui.hpp>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/aruco/charuco.hpp>
+#include <opencv2/imgproc.hpp>
+#include <vector>
+#include <iostream>
+#include <ctime>
+#include "opencv2/calib3d/calib3d.hpp"
+#include <opencv2/aruco.hpp>
+
+using namespace std;
+using namespace cv;
+
+
+
+//cv::VideoCapture vc;
+
+    int squaresX = 5;//인쇄한 보드의 가로방향 마커 갯수
+    int squaresY = 7;//인쇄한 보드의 세로방향 마커 갯수
+    float squareLength = 36;//검은색 테두리 포함한 정사각형의 한변 길이, mm단위로 입력
+    float markerLength = 18;//인쇄물에서의 마커 한변의 길이, mm단위로 입력
+    int dictionaryId = 10;//DICT_6X6_250=10
+    string outputFile = "output.txt";
+
+    int calibrationFlags = 0;
+    float aspectRatio = 1;
+
+
+    Ptr<aruco::DetectorParameters> detectorParams = aruco::DetectorParameters::create();
+
+    bool refindStrategy =true;
+    int camId = 2;
+
+    VideoCapture inputVideo;
+	//inputVideo.open(camId);
+    int waitTime = 10;
+
+    Ptr<aruco::Dictionary> dictionary =
+        aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(dictionaryId));
+
+    // create charuco board object
+    Ptr<aruco::CharucoBoard> charucoboard =
+        aruco::CharucoBoard::create(squaresX, squaresY, squareLength, markerLength, dictionary);
+    Ptr<aruco::Board> board = charucoboard.staticCast<aruco::Board>();
+
+    // collect data from each frame
+    vector< vector< vector< Point2f > > > allCorners;
+    vector< vector< int > > allIds;
+    vector< Mat > allImgs;
+    Size imgSize;
+
+    vector< Mat > rvecs, tvecs;
+
+
+
+
+Mat camMatrix, distCoeffs;
 
 bool initCamera(char *paramFile) {
-	return false;
+	//FileStorage fs("../../markViewer/build/output.txt",FileStorage::READ);
+	FileStorage fs("./output.txt",FileStorage::READ);
+	if(!fs.isOpened()) {
+			return false;
+	}
+    fs["camera_matrix"] >> camMatrix;
+    fs["distortion_coefficients"] >> distCoeffs;
+
+    inputVideo.open(camId);
+	if(!inputVideo.isOpened()) {
+		printf("Video open error...\n");
+	} else {
+		printf("Video open Success...\n");
+	}
+    waitTime = 10;
+
+	printf("[%s] is OK!!!\n", __func__);
+	return true;
 }
 
 bool getCameraImage(cv::Mat &src) {
+
+
+
 	return false;
 }
+
+// releaseCamera 는 지금은 안쓰도록
+void releaseCamera() {
+	if(inputVideo.isOpened()) {
+		inputVideo.release();
+		printf("Released VideoCapture.\n");
+	}
+
+	//release VideoCapture
+	// delete pVideoCapture;
+}
+
 
 int main( void ) {
 	// Initialise GLFW
@@ -66,6 +154,7 @@ int main( void ) {
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
+	cv::Mat newImg;
 	cv::Mat tvec, rvec;
 	HsCamera *pUsbCam = new HsCamera();
 
@@ -114,7 +203,13 @@ int main( void ) {
 	glUseProgram(programID);
 
 
-	do{
+	if(!initCamera("../../asdf.yml")) {
+		printf("Parameter file error.\n");
+		return 0;
+	}
+
+
+	do {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 
@@ -130,9 +225,22 @@ int main( void ) {
 
 
 		// Image grab.
+		if(!inputVideo.grab()) {
+			continue;
+		} else {
+			inputVideo.retrieve(newImg);
+			cv::imshow("형석이 소스", newImg);
+			cv::waitKey(1);
+		}
 		// Postion data 추출...
+		
 
 		// CV vector -> glm Vector converting.
+
+
+
+
+
 
 
 		glm::mat4 myView = glm::mat4(1.0f);
@@ -152,7 +260,7 @@ int main( void ) {
 		//glm::mat4 scale_m = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 		//glm::mat4 scale_m = glm::scale(myView, glm::vec3(1.0f, 1.0f, 1.0f));
 
-		std::cout << "Default " << glm::to_string(myView) << std::endl;
+		//std::cout << "Default " << glm::to_string(myView) << std::endl;
 
 		// Model matrix : an identity matrix (model will be at the origin)
 		glm::mat4 Model      = glm::mat4(1.0f);
@@ -204,6 +312,8 @@ int main( void ) {
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 		   glfwWindowShouldClose(window) == 0 );
 
+
+	releaseCamera();
 
     // Cleanup VBO
     glDeleteBuffers(1, &vertexbuffer);
