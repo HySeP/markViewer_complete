@@ -155,7 +155,7 @@ int main( void ) {
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 	cv::Mat newImg;
-	cv::Mat tvec, rvec;
+	//cv::Mat tvec, rvec;
 	HsCamera *pUsbCam = new HsCamera();
 
 
@@ -186,11 +186,12 @@ int main( void ) {
 
 
 
+	float l = 1.0f;
 
     static const GLfloat g_vertex_buffer_data[] = {
-        -1.0f, -1.0f, 0.0f,
-         1.0f, -1.0f, 0.0f,
-         0.0f,  1.0f, 0.0f,
+        -l, -l, 0.0f,
+         l, -l, 0.0f,
+         0.0f,  l, 0.0f,
     };
 
     GLuint vertexbuffer;
@@ -227,35 +228,161 @@ int main( void ) {
 		// Image grab.
 		if(!inputVideo.grab()) {
 			continue;
-		} else {
-			inputVideo.retrieve(newImg);
-			cv::imshow("형석이 소스", newImg);
-			cv::waitKey(1);
 		}
+
+		//	inputVideo.retrieve(newImg);
+		//	cv::imshow("형석이 소스", newImg);
+		//	cv::waitKey(1);
 		// Postion data 추출...
+    vector<cv::Point3f> markerCorners3d;
+    markerCorners3d.push_back(cv::Point3f(-0.5f, 0.5f, 0));
+    markerCorners3d.push_back(cv::Point3f(0.5f, 0.5f, 0));
+    markerCorners3d.push_back(cv::Point3f(0.5f, -0.5f, 0));
+    markerCorners3d.push_back(cv::Point3f(-0.5f, -0.5f, 0));
+
+
+        Mat image, imageCopy;
+        Mat rvec(3, 1, CV_64F), tvec(3, 1, CV_64F);
+        inputVideo.retrieve(image);
+
+        vector< int > ids;
+        vector< vector< Point2f > > corners, rejected;
+
+        // detect markers
+        aruco::detectMarkers(image, dictionary, corners, ids, detectorParams, rejected);
+
+        // refind strategy to detect more markers
+        if (refindStrategy) aruco::refineDetectedMarkers(image, board, corners, ids, rejected);
+
+        // interpolate charuco corners
+        Mat currentCharucoCorners, currentCharucoIds;
+        if (ids.size() > 0) aruco::interpolateCornersCharuco(corners, ids, image, charucoboard, currentCharucoCorners, currentCharucoIds);
+
+        // draw results
+        image.copyTo(imageCopy);
+        if (ids.size() > 0) {
+            aruco::drawDetectedMarkers(imageCopy, corners);
+            int seq=0;
+            vector<Point2f> mark8Points;
+
+            for(vector<int>::iterator itr = ids.begin(); itr != ids.end(); itr++) {
+                if(*itr == 8) {
+                    printf("----[%d]\n", *itr);
+
+                    mark8Points = corners[seq]; // = m;
+
+                    //Mat input_image = imread("test.jpg", IMREAD_COLOR);
+                    //Mat input_image = imread("test.jpg", IMREAD_COLOR);
+
+                    solvePnP(markerCorners3d, mark8Points, camMatrix, distCoeffs, rvec, tvec);
+                    cout << "markerID" << *itr << endl;
+                    cout << "rotation_vector" << endl << rvec << endl;
+                    cout << "translation_vector" << endl << tvec << endl;
+
+
+                    //for(vector<Point2f>::iterator iter=mark8Points.begin(); iter!=mark8Points.end();iter++) printf("[%f,%f]\n", iter[0].x, iter[0].y);
+
+                    aruco::drawAxis(imageCopy, camMatrix, distCoeffs, rvec, tvec, 1.0);
+
+
+                }
+                seq++;
+            }
+        }
+
+        if (currentCharucoCorners.total() > 0)
+            aruco::drawDetectedCornersCharuco(imageCopy, currentCharucoCorners, currentCharucoIds);
+
+        putText(imageCopy, "Press 'c' to add current frame. 'ESC' to finish and calibrate",
+                Point(10, 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
+
+        imshow("out", imageCopy);
+        char key = (char)waitKey(waitTime);
+        if (key == 27) break;
+        if (key == 'c' && ids.size() > 0) {
+            cout << "Frame captured" << endl;
+            allCorners.push_back(corners);
+            allIds.push_back(ids);
+            allImgs.push_back(image);
+            imgSize = image.size();
+		}
+/*
+
+		Mat R;
+		Rodrigues(rvec, R);
+		Mat R_inv = R.inv();
+*/
+
+		Mat matR;
+		glm::mat4 camPose = glm::mat4(0.0f);
+		Rodrigues(rvec, matR);
+
+   		cv::Rodrigues(rvec, matR);
+    	cv::Mat T = cv::Mat::eye(4, 4, matR.type()); // T is 4x4 unit matrix.
+    	for(unsigned int row=0; row<3; ++row) {
+        	for(unsigned int col=0; col<3; ++col) {
+            	T.at<double>(row, col) = matR.at<double>(row, col);
+        	}
+        	T.at<double>(row, 3) = tvec.at<double>(row, 0);
+    	}
+
+    	//Convert CV to GL
+    	cv::Mat cvToGl = cv::Mat::zeros(4, 4, CV_64F);
+    	cvToGl.at<double>(0, 0) =  1.0f;
+    	cvToGl.at<double>(1, 1) = -1.0f; // Invert the y axis
+    	cvToGl.at<double>(2, 2) = -1.0f; // invert the z axis
+    	cvToGl.at<double>(3, 3) =  1.0f;
+    	T = cvToGl * T;
+
+    	//Convert to cv::Mat to glm::mat4.
+    	for(int i=0; i < T.cols; i++) {
+        	for(int j=0; j < T.rows; j++) {
+            	camPose[j][i] = *T.ptr<double>(i, j);
+        	}
+    	}
 		
+
+
+
+		//for...
+
+
+		//Mat camTvec = -R_inv * tvec;
+//		float* p = (float*)P.data;
+
+
+
 
 		// CV vector -> glm Vector converting.
 
+//        cout << "rotation_vector222" << endl << rvec.at<double>(0)  << endl;
 
-
-
-
-
-
+/*
 		glm::mat4 myView = glm::mat4(1.0f);
 		glm::vec3 axis = glm::vec3(0, 1, 0);
 
+//		printf("%e\n", tvec.at<float>(0));
+
 		//transfer
-		//myView = glm::translate(myView, glm::vec3(4, 3, 3));
-		myView = glm::translate(myView, glm::vec3(0, 0, -3));
-		//myView = glm::translate(myView, glm::vec3(-3, 0, -5));
+//		myView = glm::translate(myView, glm::vec3(0, 0, -3));
+//		myView = glm::translate(myView, glm::vec3(
+//					tvec.at<double>(0),
+//					-tvec.at<double>(1),
+//					-tvec.at<double>(2)));
+//		myView = glm::translate(myView, glm::vec3(-3, 0, -5));
 
 		//rotation.
-		myView = glm::rotate(myView, glm::radians(00.0f), glm::vec3(1, 0, 0));	// X axis rotation.
-		myView = glm::rotate(myView, glm::radians( 0.0f), glm::vec3(0, 1, 0));	// y axis rotation.
-		myView = glm::rotate(myView, glm::radians(45.0f), glm::vec3(0, 0, 1));	// z axis rotation.
-		
+//        myView = glm::rotate(myView, glm::radians(rvec.at<double>(0)), glm::vec3(1, 0, 0)); // X axis rotation.
+
+//		myView = glm::rotate(myView, camTvec.at<float>(0), glm::vec3(1, 0, 0));	// X axis rotation.
+//		myView = glm::rotate(myView, camTvec.at<float>(1), glm::vec3(0, 1, 0));	// y axis rotation.
+//		myView = glm::rotate(myView, camRvec.at<float>(2), glm::vec3(0, 0, 1));	// z axis rotation.
+
+
+//		myView = glm::rotate(myView, glm::radians( 0.0f), glm::vec3(1, 0, 0));	// X axis rotation.
+//		myView = glm::rotate(myView, glm::radians( 0.0f), glm::vec3(0, 1, 0));	// y axis rotation.
+//		myView = glm::rotate(myView, glm::radians(45.0f), glm::vec3(0, 0, 1));	// z axis rotation.		
+*/		
 
 		//glm::mat4 scale_m = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 		//glm::mat4 scale_m = glm::scale(myView, glm::vec3(1.0f, 1.0f, 1.0f));
@@ -266,7 +393,7 @@ int main( void ) {
 		glm::mat4 Model      = glm::mat4(1.0f);
 		// Our ModelViewProjection : multiplication of our 3 matrices
 		//glm::mat4 MVP        = Projection * View * Model; // Remember, matrix multiplication is the other way around
-		glm::mat4 MVP        = Projection * myView * Model; // Remember, matrix multiplication is the other way around
+		glm::mat4 MVP        = Projection * camPose * Model; // Remember, matrix multiplication is the other way around
 
 
 
@@ -307,7 +434,7 @@ int main( void ) {
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-
+		
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 		   glfwWindowShouldClose(window) == 0 );
@@ -330,4 +457,3 @@ int main( void ) {
 
 	return 0;
 }
-
