@@ -53,7 +53,7 @@ bool HsCamera::grab(cv::Mat &rtn) {
 	} else return false;
 }
 
-bool HsCamera::getCameraImage(cv::Mat & src, vector<cv::Point3f> mc3d){
+bool HsCamera::getCameraImage(cv::Mat & src, glm::mat4 &camPose, vector<cv::Point3f> mc3d){
 	/*
 	do{
 		// Image grab.
@@ -127,7 +127,7 @@ bool HsCamera::getCameraImage(cv::Mat & src, vector<cv::Point3f> mc3d){
 		}
 
 		Mat matR;
-		glm::mat4 camPose = glm::mat4(0.0f);
+//		glm::mat4 camPose = glm::mat4(0.0f);
 		Rodrigues(rvec, matR);
 
 		cv::Rodrigues(rvec, matR);

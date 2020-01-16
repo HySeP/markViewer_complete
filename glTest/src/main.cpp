@@ -23,19 +23,18 @@ using namespace glm;
 #include <iostream>
 #include <ctime>
 
+/*
 #include <opencv2/highgui.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/aruco/charuco.hpp>
 #include <opencv2/imgproc.hpp>
 #include "opencv2/calib3d/calib3d.hpp"
 #include <opencv2/aruco.hpp>
+*/
 
 using namespace std;
 using namespace cv;
 
-
-
-//cv::VideoCapture vc;
 int squaresX = 5;//인쇄한 보드의 가로방향 마커 갯수
 int squaresY = 7;//인쇄한 보드의 세로방향 마커 갯수
 float squareLength = 36;//검은색 테두리 포함한 정사각형의 한변 길이, mm단위로 입력
@@ -221,6 +220,8 @@ int main( void ) {
 
 
 	cv::Mat src;
+	glm::mat4 myCam = glm::mat4(0.0f);
+
 	do {
 
 		///////////////////////////////////////////////////////////////////
@@ -231,128 +232,24 @@ int main( void ) {
 		//if(!inputVideo.grab()) continue;
 
 		if(!pUsbCam->grab(src))  continue;
-		if(!pUsbCam->getCameraImage(src, markerCorners3d))  continue;
+		if(!pUsbCam->getCameraImage(src, myCam, markerCorners3d))  continue;
 
-
-
-
-		//	inputVideo.retrieve(newImg);
-/*
-		Mat image, imageCopy;
-		Mat rvec(3, 1, CV_64F), tvec(3, 1, CV_64F);
-
-		vector< int > ids;
-		vector< vector< Point2f > > corners, rejected;
-
-		// detect markers
-		aruco::detectMarkers(image, dictionary, corners, ids, detectorParams, rejected);
-
-		// refind strategy to detect more markers
-		//if (refindStrategy) aruco::refineDetectedMarkers(image, board, corners, ids, rejected);
-		aruco::refineDetectedMarkers(image, board, corners, ids, rejected);
-
-		// interpolate charuco corners
-		Mat currentCharucoCorners, currentCharucoIds;
-		if (ids.size() > 0) aruco::interpolateCornersCharuco(corners, ids, image, charucoboard, currentCharucoCorners, currentCharucoIds);
-
-		// draw results
-		image.copyTo(imageCopy);
-		if (ids.size() > 0) {
-			aruco::drawDetectedMarkers(imageCopy, corners);
-			int seq=0;
-			vector<Point2f> mark8Points;
-
-			for(vector<int>::iterator itr = ids.begin(); itr != ids.end(); itr++) {
-				if(*itr == 8) {
-					printf("----[%d]\n", *itr);
-
-					mark8Points = corners[seq]; // = m;
-
-					//Mat input_image = imread("test.jpg", IMREAD_COLOR);
-					//Mat input_image = imread("test.jpg", IMREAD_COLOR);
-
-					solvePnP(markerCorners3d, mark8Points, camMatrix, distCoeffs, rvec, tvec);
-					cout << "markerID" << *itr << endl;
-					cout << "rotation_vector" << endl << rvec << endl;
-					cout << "translation_vector" << endl << tvec << endl;
-
-
-					//for(vector<Point2f>::iterator iter=mark8Points.begin(); iter!=mark8Points.end();iter++) printf("[%f,%f]\n", iter[0].x, iter[0].y);
-
-					aruco::drawAxis(imageCopy, camMatrix, distCoeffs, rvec, tvec, 1.0);
-
-
-				}
-				seq++;
-			}
-		}
-
-		if (currentCharucoCorners.total() > 0)
-			aruco::drawDetectedCornersCharuco(imageCopy, currentCharucoCorners, currentCharucoIds);
-
-		putText(imageCopy, "Press 'c' to add current frame. 'ESC' to finish and calibrate",
-				Point(10, 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
-
-		imshow("out", imageCopy);
-		char key = (char)waitKey(waitTime);
-		if (key == 27) break;
-		if (key == 'c' && ids.size() > 0) {
-			cout << "Frame captured" << endl;
-			allCorners.push_back(corners);
-			allIds.push_back(ids);
-			allImgs.push_back(image);
-			imgSize = image.size();
-		}
-
-		Mat matR;
-		Rodrigues(rvec, matR);
-		cv::Rodrigues(rvec, matR);
-		cv::Mat T = cv::Mat::eye(4, 4, matR.type()); // T is 4x4 unit matrix.
-		for(unsigned int row=0; row<3; ++row) {
-			for(unsigned int col=0; col<3; ++col) {
-				T.at<double>(row, col) = matR.at<double>(row, col);
-			}
-			T.at<double>(row, 3) = tvec.at<double>(row, 0);
-		}
-
-		///////////////////////////////////////////////////////////////////
-		//Converting parts
-		///////////////////////////////////////////////////////////////////
-
-		//Convert CV to GL
-		cv::Mat cvToGl = cv::Mat::zeros(4, 4, CV_64F);
-		cvToGl.at<double>(0, 0) =  1.0f;
-		cvToGl.at<double>(1, 1) = -1.0f; // Invert the y axis
-		cvToGl.at<double>(2, 2) = -1.0f; // invert the z axis
-		cvToGl.at<double>(3, 3) =  1.0f;
-		T = cvToGl * T;
-
-		//Convert to cv::Mat to glm::mat4.
-		glm::mat4 camPose = glm::mat4(0.0f);
-		for(int i=0; i < T.cols; i++) {
-			for(int j=0; j < T.rows; j++) {
-				camPose[j][i] = *T.ptr<double>(i, j);
-			}
-		}
-*/
 
 
 		///////////////////////////////////////////////////////////////////
 		// OpenGL parts
 		///////////////////////////////////////////////////////////////////
-/*
-		        //TODO: delete;
 
-*/
-		glm::mat4 camPose = glm::mat4(0.0f);
+
+//d		glm::mat4 camPose = glm::mat4(0.0f);
 
 		// CV vector -> glm Vector converting.
-		glm::mat4 myView = glm::mat4(1.0f);
-		glm::vec3 axis = glm::vec3(0, 1, 0);
+//d		glm::mat4 myView = glm::mat4(1.0f);
+//d		glm::vec3 axis = glm::vec3(0, 1, 0);
 
 		// Model matrix : an identity matrix (model will be at the origin)
 		glm::mat4 Model      = glm::mat4(1.0f);
-		glm::mat4 MVP        = Projection * camPose * Model; // Remember, matrix multiplication is the other way around
+		glm::mat4 MVP        = Projection * myCam * Model; // Remember, matrix multiplication is the other way around
 
 
 		//if(pUsbCam->getNewImage() && pUsbCam->getCameraPose(tvec, rvec)) {
@@ -390,6 +287,8 @@ int main( void ) {
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 			glfwWindowShouldClose(window) == 0 );
+
+
 
 	pUsbCam->releaseCamera();
 

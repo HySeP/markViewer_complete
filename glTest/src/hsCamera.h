@@ -30,7 +30,7 @@ class HsCamera {
 
 		Ptr<aruco::Board> board;
 
-		int camId = 0;
+		int camId = 2;
 		VideoCapture inputVideo;
 
 		vector< vector< vector< Point2f > > > allCorners;
@@ -50,7 +50,7 @@ vector< Mat > rvecs, tvecs;
 
 		bool initCamera(const char * paramFile);
 		bool grab(cv::Mat &rtn);
-		bool getCameraImage(cv::Mat& src, vector<cv::Point3f> mc3d);
+		bool getCameraImage(cv::Mat& src, glm::mat4 &camPose, vector<cv::Point3f> mc3d);
 		bool getPose(cv::Mat& src, cv::Mat T);
 		bool releaseCamera();
 };
