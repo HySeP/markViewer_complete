@@ -1,12 +1,16 @@
 #ifndef HSCAMERA_H
 #define HSCAMERA_H
 
-#include <opencv2/opencv.hpp>
-#include <opencv2/aruco.hpp>
-#include <glm/glm.hpp>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <opencv2/opencv.hpp>
+#include <opencv2/aruco.hpp>
+#include <opencv2/aruco/charuco.hpp>
+
+
+#include <glm/glm.hpp>
 
 using namespace std;
 using namespace cv;
@@ -22,17 +26,32 @@ class HsCamera {
 
     	Ptr<aruco::DetectorParameters> detectorParams;
     	Ptr<aruco::Dictionary> dictionary;
+		Ptr<aruco::CharucoBoard> charucoboard;
+
+		Ptr<aruco::Board> board;
 
 		int camId = 0;
 		VideoCapture inputVideo;
 
+		vector< vector< vector< Point2f > > > allCorners;
+		vector< vector< int > > allIds;
+		vector< Mat > allImgs;
+		Size imgSize;
+
+vector< Mat > rvecs, tvecs;
+
+
 	protected:
+		int  waitTime = 10;
+		Mat camMatrix, distCoeffs;
 	public:
 		HsCamera();
 		virtual ~HsCamera();
 
 		bool initCamera(const char * paramFile);
-		bool getCameraImage(cv::Mat& src);
+		bool grab(cv::Mat &rtn);
+		bool getCameraImage(cv::Mat& src, vector<cv::Point3f> mc3d);
+		bool getPose(cv::Mat& src, cv::Mat T);
 		bool releaseCamera();
 };
 

@@ -19,14 +19,14 @@ using namespace glm;
 
 #include "hsCamera.h"
 
+#include <vector>
+#include <iostream>
+#include <ctime>
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/aruco/charuco.hpp>
 #include <opencv2/imgproc.hpp>
-#include <vector>
-#include <iostream>
-#include <ctime>
 #include "opencv2/calib3d/calib3d.hpp"
 #include <opencv2/aruco.hpp>
 
@@ -36,71 +36,67 @@ using namespace cv;
 
 
 //cv::VideoCapture vc;
-/*
-    int squaresX = 5;//인쇄한 보드의 가로방향 마커 갯수
-    int squaresY = 7;//인쇄한 보드의 세로방향 마커 갯수
-    float squareLength = 36;//검은색 테두리 포함한 정사각형의 한변 길이, mm단위로 입력
-    float markerLength = 18;//인쇄물에서의 마커 한변의 길이, mm단위로 입력
-    int dictionaryId = 10;//DICT_6X6_250=10
-    string outputFile = "output.txt";
+int squaresX = 5;//인쇄한 보드의 가로방향 마커 갯수
+int squaresY = 7;//인쇄한 보드의 세로방향 마커 갯수
+float squareLength = 36;//검은색 테두리 포함한 정사각형의 한변 길이, mm단위로 입력
+float markerLength = 18;//인쇄물에서의 마커 한변의 길이, mm단위로 입력
+int dictionaryId = 10;//DICT_6X6_250=10
+string outputFile = "output.txt";
 
-    int calibrationFlags = 0;
-    float aspectRatio = 1;
+int calibrationFlags = 0;
+float aspectRatio = 1;
 
+Ptr<aruco::DetectorParameters> detectorParams = aruco::DetectorParameters::create();
 
-    Ptr<aruco::DetectorParameters> detectorParams = aruco::DetectorParameters::create();
+bool refindStrategy =true;
+int camId = 2;
 
-    bool refindStrategy =true;
-    int camId = 2;
+VideoCapture inputVideo;
+//inputVideo.open(camId);
+int waitTime = 10;
 
-    VideoCapture inputVideo;
-	//inputVideo.open(camId);
-    int waitTime = 10;
+Ptr<aruco::Dictionary> dictionary =
+aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(dictionaryId));
 
-    Ptr<aruco::Dictionary> dictionary =
-        aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(dictionaryId));
+// create charuco board object
+Ptr<aruco::CharucoBoard> charucoboard = aruco::CharucoBoard::create(squaresX, squaresY, squareLength, markerLength, dictionary);
+Ptr<aruco::Board> board = charucoboard.staticCast<aruco::Board>();
 
-    // create charuco board object
-    Ptr<aruco::CharucoBoard> charucoboard =
-        aruco::CharucoBoard::create(squaresX, squaresY, squareLength, markerLength, dictionary);
-    Ptr<aruco::Board> board = charucoboard.staticCast<aruco::Board>();
+// collect data from each frame
+vector< vector< vector< Point2f > > > allCorners;
+vector< vector< int > > allIds;
+vector< Mat > allImgs;
+Size imgSize;
 
-    // collect data from each frame
-    vector< vector< vector< Point2f > > > allCorners;
-    vector< vector< int > > allIds;
-    vector< Mat > allImgs;
-    Size imgSize;
-
-    vector< Mat > rvecs, tvecs;
+vector< Mat > rvecs, tvecs;
 
 
-	HsCamera hsCam;
-*/
+HsCamera hsCam;
 
 //Mat camMatrix, distCoeffs;
 
 /*
-bool initCamera(char *paramFile) {
-	//FileStorage fs("../../markViewer/build/output.txt",FileStorage::READ);
-	FileStorage fs("./output.txt",FileStorage::READ);
-	if(!fs.isOpened()) {
-			return false;
-	}
-    fs["camera_matrix"] >> camMatrix;
-    fs["distortion_coefficients"] >> distCoeffs;
-
-    inputVideo.open(camId);
-	if(!inputVideo.isOpened()) {
-		printf("Video open error...\n");
-	} else {
-		printf("Video open Success...\n");
-	}
-    waitTime = 10;
-
-	printf("[%s] is OK!!!\n", __func__);
-	return true;
+   bool initCamera(char *paramFile) {
+//FileStorage fs("../../markViewer/build/output.txt",FileStorage::READ);
+FileStorage fs("./output.txt",FileStorage::READ);
+if(!fs.isOpened()) {
+return false;
 }
-*/
+fs["camera_matrix"] >> camMatrix;
+fs["distortion_coefficients"] >> distCoeffs;
+
+inputVideo.open(camId);
+if(!inputVideo.isOpened()) {
+printf("Video open error...\n");
+} else {
+printf("Video open Success...\n");
+}
+waitTime = 10;
+
+printf("[%s] is OK!!!\n", __func__);
+return true;
+}
+ */
 
 
 /*
@@ -167,7 +163,6 @@ int main( void ) {
 	HsCamera *pUsbCam = new HsCamera();
 
 
-
 	// Dark blue background
 	glClearColor(0.0f, 0.40f, 0.0f, 0.0f);
 
@@ -192,8 +187,6 @@ int main( void ) {
    	//std::cout << "View matrix = " << std::endl << " "  << View << std::endl << std::endl;
 
 
-
-
 	float l = 1.0f;
 
     static const GLfloat g_vertex_buffer_data[] = {
@@ -212,45 +205,41 @@ int main( void ) {
 	glUseProgram(programID);
 
 
-	if(!initCamera("../../asdf.yml")) {
+
+
+	if(!pUsbCam->initCamera("../../asdf.yml")) {
 		printf("Parameter file error.\n");
 		return 0;
 	}
 
+	// Postion data 추출...
+	vector<cv::Point3f> markerCorners3d;
+	markerCorners3d.push_back(cv::Point3f(-0.5f, 0.5f, 0));
+	markerCorners3d.push_back(cv::Point3f(0.5f, 0.5f, 0));
+	markerCorners3d.push_back(cv::Point3f(0.5f, -0.5f, 0));
+	markerCorners3d.push_back(cv::Point3f(-0.5f, -0.5f, 0));
 
+
+	cv::Mat src;
 	do {
 
-
-		// Camera matrix
-
-		//		glm::mat4 View      = glm::lookAt(
-		//				glm::vec3(4,3,3), // Camera is at (4,3,3), in World Space
-		//				glm::vec3(0,0,0), // and looks at the origin
-		//				glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
-		//				);
-
-		//std::cout << "Default " << glm::to_string(View) << std::endl;
-
+		///////////////////////////////////////////////////////////////////
+		// OpenCV parts
+		///////////////////////////////////////////////////////////////////
 
 		// Image grab.
-		if(!inputVideo.grab()) {
-			continue;
-		}
+		//if(!inputVideo.grab()) continue;
+
+		if(!pUsbCam->grab(src))  continue;
+		if(!pUsbCam->getCameraImage(src, markerCorners3d))  continue;
+
+
+
 
 		//	inputVideo.retrieve(newImg);
-		//	cv::imshow("형석이 소스", newImg);
-		//	cv::waitKey(1);
-		// Postion data 추출...
-		vector<cv::Point3f> markerCorners3d;
-		markerCorners3d.push_back(cv::Point3f(-0.5f, 0.5f, 0));
-		markerCorners3d.push_back(cv::Point3f(0.5f, 0.5f, 0));
-		markerCorners3d.push_back(cv::Point3f(0.5f, -0.5f, 0));
-		markerCorners3d.push_back(cv::Point3f(-0.5f, -0.5f, 0));
-
-
+/*
 		Mat image, imageCopy;
 		Mat rvec(3, 1, CV_64F), tvec(3, 1, CV_64F);
-		inputVideo.retrieve(image);
 
 		vector< int > ids;
 		vector< vector< Point2f > > corners, rejected;
@@ -259,7 +248,8 @@ int main( void ) {
 		aruco::detectMarkers(image, dictionary, corners, ids, detectorParams, rejected);
 
 		// refind strategy to detect more markers
-		if (refindStrategy) aruco::refineDetectedMarkers(image, board, corners, ids, rejected);
+		//if (refindStrategy) aruco::refineDetectedMarkers(image, board, corners, ids, rejected);
+		aruco::refineDetectedMarkers(image, board, corners, ids, rejected);
 
 		// interpolate charuco corners
 		Mat currentCharucoCorners, currentCharucoIds;
@@ -314,16 +304,8 @@ int main( void ) {
 			imgSize = image.size();
 		}
 
-
-		//		Mat R;
-		//		Rodrigues(rvec, R);
-		//		Mat R_inv = R.inv();
-
-
 		Mat matR;
-		glm::mat4 camPose = glm::mat4(0.0f);
 		Rodrigues(rvec, matR);
-
 		cv::Rodrigues(rvec, matR);
 		cv::Mat T = cv::Mat::eye(4, 4, matR.type()); // T is 4x4 unit matrix.
 		for(unsigned int row=0; row<3; ++row) {
@@ -332,6 +314,10 @@ int main( void ) {
 			}
 			T.at<double>(row, 3) = tvec.at<double>(row, 0);
 		}
+
+		///////////////////////////////////////////////////////////////////
+		//Converting parts
+		///////////////////////////////////////////////////////////////////
 
 		//Convert CV to GL
 		cv::Mat cvToGl = cv::Mat::zeros(4, 4, CV_64F);
@@ -342,60 +328,30 @@ int main( void ) {
 		T = cvToGl * T;
 
 		//Convert to cv::Mat to glm::mat4.
+		glm::mat4 camPose = glm::mat4(0.0f);
 		for(int i=0; i < T.cols; i++) {
 			for(int j=0; j < T.rows; j++) {
 				camPose[j][i] = *T.ptr<double>(i, j);
 			}
 		}
+*/
 
 
-		//for...
+		///////////////////////////////////////////////////////////////////
+		// OpenGL parts
+		///////////////////////////////////////////////////////////////////
+/*
+		        //TODO: delete;
 
-
-		//Mat camTvec = -R_inv * tvec;
-		//		float* p = (float*)P.data;
-
-
-
+*/
+		glm::mat4 camPose = glm::mat4(0.0f);
 
 		// CV vector -> glm Vector converting.
-
-		//        cout << "rotation_vector222" << endl << rvec.at<double>(0)  << endl;
-
 		glm::mat4 myView = glm::mat4(1.0f);
 		glm::vec3 axis = glm::vec3(0, 1, 0);
 
-		//		printf("%e\n", tvec.at<float>(0));
-
-		//transfer
-		//		myView = glm::translate(myView, glm::vec3(0, 0, -3));
-		//		myView = glm::translate(myView, glm::vec3(
-		//					tvec.at<double>(0),
-		//					-tvec.at<double>(1),
-		//					-tvec.at<double>(2)));
-		//		myView = glm::translate(myView, glm::vec3(-3, 0, -5));
-
-		//rotation.
-		//        myView = glm::rotate(myView, glm::radians(rvec.at<double>(0)), glm::vec3(1, 0, 0)); // X axis rotation.
-
-		//		myView = glm::rotate(myView, camTvec.at<float>(0), glm::vec3(1, 0, 0));	// X axis rotation.
-		//		myView = glm::rotate(myView, camTvec.at<float>(1), glm::vec3(0, 1, 0));	// y axis rotation.
-		//		myView = glm::rotate(myView, camRvec.at<float>(2), glm::vec3(0, 0, 1));	// z axis rotation.
-
-
-		//		myView = glm::rotate(myView, glm::radians( 0.0f), glm::vec3(1, 0, 0));	// X axis rotation.
-		//		myView = glm::rotate(myView, glm::radians( 0.0f), glm::vec3(0, 1, 0));	// y axis rotation.
-		//		myView = glm::rotate(myView, glm::radians(45.0f), glm::vec3(0, 0, 1));	// z axis rotation.		
-
-		//glm::mat4 scale_m = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		//glm::mat4 scale_m = glm::scale(myView, glm::vec3(1.0f, 1.0f, 1.0f));
-
-		//std::cout << "Default " << glm::to_string(myView) << std::endl;
-
 		// Model matrix : an identity matrix (model will be at the origin)
 		glm::mat4 Model      = glm::mat4(1.0f);
-		// Our ModelViewProjection : multiplication of our 3 matrices
-		//glm::mat4 MVP        = Projection * View * Model; // Remember, matrix multiplication is the other way around
 		glm::mat4 MVP        = Projection * camPose * Model; // Remember, matrix multiplication is the other way around
 
 
@@ -408,10 +364,6 @@ int main( void ) {
 		// Send our transformation to the currently bound shader,
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-
-
-		// Draw nothing, see you in tutorial 2 !
 
 		// 1rst attribute buffer : vertices
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -439,8 +391,7 @@ int main( void ) {
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 			glfwWindowShouldClose(window) == 0 );
 
-
-	releaseCamera();
+	pUsbCam->releaseCamera();
 
 	// Cleanup VBO
 	glDeleteBuffers(1, &vertexbuffer);
