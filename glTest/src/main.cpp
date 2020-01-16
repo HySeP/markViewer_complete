@@ -36,7 +36,7 @@ using namespace cv;
 
 
 //cv::VideoCapture vc;
-
+/*
     int squaresX = 5;//인쇄한 보드의 가로방향 마커 갯수
     int squaresY = 7;//인쇄한 보드의 세로방향 마커 갯수
     float squareLength = 36;//검은색 테두리 포함한 정사각형의 한변 길이, mm단위로 입력
@@ -74,10 +74,12 @@ using namespace cv;
     vector< Mat > rvecs, tvecs;
 
 
+	HsCamera hsCam;
+*/
 
+//Mat camMatrix, distCoeffs;
 
-Mat camMatrix, distCoeffs;
-
+/*
 bool initCamera(char *paramFile) {
 	//FileStorage fs("../../markViewer/build/output.txt",FileStorage::READ);
 	FileStorage fs("./output.txt",FileStorage::READ);
@@ -98,14 +100,19 @@ bool initCamera(char *paramFile) {
 	printf("[%s] is OK!!!\n", __func__);
 	return true;
 }
+*/
 
+
+/*
 bool getCameraImage(cv::Mat &src) {
-
 
 
 	return false;
 }
+*/
 
+
+/*
 // releaseCamera 는 지금은 안쓰도록
 void releaseCamera() {
 	if(inputVideo.isOpened()) {
@@ -116,6 +123,7 @@ void releaseCamera() {
 	//release VideoCapture
 	// delete pVideoCapture;
 }
+*/
 
 
 int main( void ) {
@@ -211,17 +219,16 @@ int main( void ) {
 
 
 	do {
-		glClear(GL_COLOR_BUFFER_BIT);
 
 
 		// Camera matrix
-		/*
-		glm::mat4 View      = glm::lookAt(
-				glm::vec3(4,3,3), // Camera is at (4,3,3), in World Space
-				glm::vec3(0,0,0), // and looks at the origin
-				glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
-				);
-		*/
+
+		//		glm::mat4 View      = glm::lookAt(
+		//				glm::vec3(4,3,3), // Camera is at (4,3,3), in World Space
+		//				glm::vec3(0,0,0), // and looks at the origin
+		//				glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+		//				);
+
 		//std::cout << "Default " << glm::to_string(View) << std::endl;
 
 
@@ -234,155 +241,151 @@ int main( void ) {
 		//	cv::imshow("형석이 소스", newImg);
 		//	cv::waitKey(1);
 		// Postion data 추출...
-    vector<cv::Point3f> markerCorners3d;
-    markerCorners3d.push_back(cv::Point3f(-0.5f, 0.5f, 0));
-    markerCorners3d.push_back(cv::Point3f(0.5f, 0.5f, 0));
-    markerCorners3d.push_back(cv::Point3f(0.5f, -0.5f, 0));
-    markerCorners3d.push_back(cv::Point3f(-0.5f, -0.5f, 0));
+		vector<cv::Point3f> markerCorners3d;
+		markerCorners3d.push_back(cv::Point3f(-0.5f, 0.5f, 0));
+		markerCorners3d.push_back(cv::Point3f(0.5f, 0.5f, 0));
+		markerCorners3d.push_back(cv::Point3f(0.5f, -0.5f, 0));
+		markerCorners3d.push_back(cv::Point3f(-0.5f, -0.5f, 0));
 
 
-        Mat image, imageCopy;
-        Mat rvec(3, 1, CV_64F), tvec(3, 1, CV_64F);
-        inputVideo.retrieve(image);
+		Mat image, imageCopy;
+		Mat rvec(3, 1, CV_64F), tvec(3, 1, CV_64F);
+		inputVideo.retrieve(image);
 
-        vector< int > ids;
-        vector< vector< Point2f > > corners, rejected;
+		vector< int > ids;
+		vector< vector< Point2f > > corners, rejected;
 
-        // detect markers
-        aruco::detectMarkers(image, dictionary, corners, ids, detectorParams, rejected);
+		// detect markers
+		aruco::detectMarkers(image, dictionary, corners, ids, detectorParams, rejected);
 
-        // refind strategy to detect more markers
-        if (refindStrategy) aruco::refineDetectedMarkers(image, board, corners, ids, rejected);
+		// refind strategy to detect more markers
+		if (refindStrategy) aruco::refineDetectedMarkers(image, board, corners, ids, rejected);
 
-        // interpolate charuco corners
-        Mat currentCharucoCorners, currentCharucoIds;
-        if (ids.size() > 0) aruco::interpolateCornersCharuco(corners, ids, image, charucoboard, currentCharucoCorners, currentCharucoIds);
+		// interpolate charuco corners
+		Mat currentCharucoCorners, currentCharucoIds;
+		if (ids.size() > 0) aruco::interpolateCornersCharuco(corners, ids, image, charucoboard, currentCharucoCorners, currentCharucoIds);
 
-        // draw results
-        image.copyTo(imageCopy);
-        if (ids.size() > 0) {
-            aruco::drawDetectedMarkers(imageCopy, corners);
-            int seq=0;
-            vector<Point2f> mark8Points;
+		// draw results
+		image.copyTo(imageCopy);
+		if (ids.size() > 0) {
+			aruco::drawDetectedMarkers(imageCopy, corners);
+			int seq=0;
+			vector<Point2f> mark8Points;
 
-            for(vector<int>::iterator itr = ids.begin(); itr != ids.end(); itr++) {
-                if(*itr == 8) {
-                    printf("----[%d]\n", *itr);
+			for(vector<int>::iterator itr = ids.begin(); itr != ids.end(); itr++) {
+				if(*itr == 8) {
+					printf("----[%d]\n", *itr);
 
-                    mark8Points = corners[seq]; // = m;
+					mark8Points = corners[seq]; // = m;
 
-                    //Mat input_image = imread("test.jpg", IMREAD_COLOR);
-                    //Mat input_image = imread("test.jpg", IMREAD_COLOR);
+					//Mat input_image = imread("test.jpg", IMREAD_COLOR);
+					//Mat input_image = imread("test.jpg", IMREAD_COLOR);
 
-                    solvePnP(markerCorners3d, mark8Points, camMatrix, distCoeffs, rvec, tvec);
-                    cout << "markerID" << *itr << endl;
-                    cout << "rotation_vector" << endl << rvec << endl;
-                    cout << "translation_vector" << endl << tvec << endl;
-
-
-                    //for(vector<Point2f>::iterator iter=mark8Points.begin(); iter!=mark8Points.end();iter++) printf("[%f,%f]\n", iter[0].x, iter[0].y);
-
-                    aruco::drawAxis(imageCopy, camMatrix, distCoeffs, rvec, tvec, 1.0);
+					solvePnP(markerCorners3d, mark8Points, camMatrix, distCoeffs, rvec, tvec);
+					cout << "markerID" << *itr << endl;
+					cout << "rotation_vector" << endl << rvec << endl;
+					cout << "translation_vector" << endl << tvec << endl;
 
 
-                }
-                seq++;
-            }
-        }
+					//for(vector<Point2f>::iterator iter=mark8Points.begin(); iter!=mark8Points.end();iter++) printf("[%f,%f]\n", iter[0].x, iter[0].y);
 
-        if (currentCharucoCorners.total() > 0)
-            aruco::drawDetectedCornersCharuco(imageCopy, currentCharucoCorners, currentCharucoIds);
+					aruco::drawAxis(imageCopy, camMatrix, distCoeffs, rvec, tvec, 1.0);
 
-        putText(imageCopy, "Press 'c' to add current frame. 'ESC' to finish and calibrate",
-                Point(10, 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
 
-        imshow("out", imageCopy);
-        char key = (char)waitKey(waitTime);
-        if (key == 27) break;
-        if (key == 'c' && ids.size() > 0) {
-            cout << "Frame captured" << endl;
-            allCorners.push_back(corners);
-            allIds.push_back(ids);
-            allImgs.push_back(image);
-            imgSize = image.size();
+				}
+				seq++;
+			}
 		}
-/*
 
-		Mat R;
-		Rodrigues(rvec, R);
-		Mat R_inv = R.inv();
-*/
+		if (currentCharucoCorners.total() > 0)
+			aruco::drawDetectedCornersCharuco(imageCopy, currentCharucoCorners, currentCharucoIds);
+
+		putText(imageCopy, "Press 'c' to add current frame. 'ESC' to finish and calibrate",
+				Point(10, 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
+
+		imshow("out", imageCopy);
+		char key = (char)waitKey(waitTime);
+		if (key == 27) break;
+		if (key == 'c' && ids.size() > 0) {
+			cout << "Frame captured" << endl;
+			allCorners.push_back(corners);
+			allIds.push_back(ids);
+			allImgs.push_back(image);
+			imgSize = image.size();
+		}
+
+
+		//		Mat R;
+		//		Rodrigues(rvec, R);
+		//		Mat R_inv = R.inv();
+
 
 		Mat matR;
 		glm::mat4 camPose = glm::mat4(0.0f);
 		Rodrigues(rvec, matR);
 
-   		cv::Rodrigues(rvec, matR);
-    	cv::Mat T = cv::Mat::eye(4, 4, matR.type()); // T is 4x4 unit matrix.
-    	for(unsigned int row=0; row<3; ++row) {
-        	for(unsigned int col=0; col<3; ++col) {
-            	T.at<double>(row, col) = matR.at<double>(row, col);
-        	}
-        	T.at<double>(row, 3) = tvec.at<double>(row, 0);
-    	}
+		cv::Rodrigues(rvec, matR);
+		cv::Mat T = cv::Mat::eye(4, 4, matR.type()); // T is 4x4 unit matrix.
+		for(unsigned int row=0; row<3; ++row) {
+			for(unsigned int col=0; col<3; ++col) {
+				T.at<double>(row, col) = matR.at<double>(row, col);
+			}
+			T.at<double>(row, 3) = tvec.at<double>(row, 0);
+		}
 
-    	//Convert CV to GL
-    	cv::Mat cvToGl = cv::Mat::zeros(4, 4, CV_64F);
-    	cvToGl.at<double>(0, 0) =  1.0f;
-    	cvToGl.at<double>(1, 1) = -1.0f; // Invert the y axis
-    	cvToGl.at<double>(2, 2) = -1.0f; // invert the z axis
-    	cvToGl.at<double>(3, 3) =  1.0f;
-    	T = cvToGl * T;
+		//Convert CV to GL
+		cv::Mat cvToGl = cv::Mat::zeros(4, 4, CV_64F);
+		cvToGl.at<double>(0, 0) =  1.0f;
+		cvToGl.at<double>(1, 1) = -1.0f; // Invert the y axis
+		cvToGl.at<double>(2, 2) = -1.0f; // invert the z axis
+		cvToGl.at<double>(3, 3) =  1.0f;
+		T = cvToGl * T;
 
-    	//Convert to cv::Mat to glm::mat4.
-    	for(int i=0; i < T.cols; i++) {
-        	for(int j=0; j < T.rows; j++) {
-            	camPose[j][i] = *T.ptr<double>(i, j);
-        	}
-    	}
-		
-
+		//Convert to cv::Mat to glm::mat4.
+		for(int i=0; i < T.cols; i++) {
+			for(int j=0; j < T.rows; j++) {
+				camPose[j][i] = *T.ptr<double>(i, j);
+			}
+		}
 
 
 		//for...
 
 
 		//Mat camTvec = -R_inv * tvec;
-//		float* p = (float*)P.data;
+		//		float* p = (float*)P.data;
 
 
 
 
 		// CV vector -> glm Vector converting.
 
-//        cout << "rotation_vector222" << endl << rvec.at<double>(0)  << endl;
+		//        cout << "rotation_vector222" << endl << rvec.at<double>(0)  << endl;
 
-/*
 		glm::mat4 myView = glm::mat4(1.0f);
 		glm::vec3 axis = glm::vec3(0, 1, 0);
 
-//		printf("%e\n", tvec.at<float>(0));
+		//		printf("%e\n", tvec.at<float>(0));
 
 		//transfer
-//		myView = glm::translate(myView, glm::vec3(0, 0, -3));
-//		myView = glm::translate(myView, glm::vec3(
-//					tvec.at<double>(0),
-//					-tvec.at<double>(1),
-//					-tvec.at<double>(2)));
-//		myView = glm::translate(myView, glm::vec3(-3, 0, -5));
+		//		myView = glm::translate(myView, glm::vec3(0, 0, -3));
+		//		myView = glm::translate(myView, glm::vec3(
+		//					tvec.at<double>(0),
+		//					-tvec.at<double>(1),
+		//					-tvec.at<double>(2)));
+		//		myView = glm::translate(myView, glm::vec3(-3, 0, -5));
 
 		//rotation.
-//        myView = glm::rotate(myView, glm::radians(rvec.at<double>(0)), glm::vec3(1, 0, 0)); // X axis rotation.
+		//        myView = glm::rotate(myView, glm::radians(rvec.at<double>(0)), glm::vec3(1, 0, 0)); // X axis rotation.
 
-//		myView = glm::rotate(myView, camTvec.at<float>(0), glm::vec3(1, 0, 0));	// X axis rotation.
-//		myView = glm::rotate(myView, camTvec.at<float>(1), glm::vec3(0, 1, 0));	// y axis rotation.
-//		myView = glm::rotate(myView, camRvec.at<float>(2), glm::vec3(0, 0, 1));	// z axis rotation.
+		//		myView = glm::rotate(myView, camTvec.at<float>(0), glm::vec3(1, 0, 0));	// X axis rotation.
+		//		myView = glm::rotate(myView, camTvec.at<float>(1), glm::vec3(0, 1, 0));	// y axis rotation.
+		//		myView = glm::rotate(myView, camRvec.at<float>(2), glm::vec3(0, 0, 1));	// z axis rotation.
 
 
-//		myView = glm::rotate(myView, glm::radians( 0.0f), glm::vec3(1, 0, 0));	// X axis rotation.
-//		myView = glm::rotate(myView, glm::radians( 0.0f), glm::vec3(0, 1, 0));	// y axis rotation.
-//		myView = glm::rotate(myView, glm::radians(45.0f), glm::vec3(0, 0, 1));	// z axis rotation.		
-*/		
+		//		myView = glm::rotate(myView, glm::radians( 0.0f), glm::vec3(1, 0, 0));	// X axis rotation.
+		//		myView = glm::rotate(myView, glm::radians( 0.0f), glm::vec3(0, 1, 0));	// y axis rotation.
+		//		myView = glm::rotate(myView, glm::radians(45.0f), glm::vec3(0, 0, 1));	// z axis rotation.		
 
 		//glm::mat4 scale_m = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 		//glm::mat4 scale_m = glm::scale(myView, glm::vec3(1.0f, 1.0f, 1.0f));
@@ -396,55 +399,52 @@ int main( void ) {
 		glm::mat4 MVP        = Projection * camPose * Model; // Remember, matrix multiplication is the other way around
 
 
-
-
 		//if(pUsbCam->getNewImage() && pUsbCam->getCameraPose(tvec, rvec)) {
 		//OpenGL camera position setting.
 		//}
 
 		//printf("drawing triangle.\n");
 
-        // Send our transformation to the currently bound shader,
-        // in the "MVP" uniform
-        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		// Send our transformation to the currently bound shader,
+		// in the "MVP" uniform
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
 
 
 		// Draw nothing, see you in tutorial 2 !
 
-        // 1rst attribute buffer : vertices
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        glVertexAttribPointer(
-            0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-            3,                  // size
-            GL_FLOAT,           // type
-            GL_FALSE,           // normalized?
-            0,                  // stride
-            (void*)0            // array buffer offset
-        );
+		// 1rst attribute buffer : vertices
+		glClear(GL_COLOR_BUFFER_BIT);
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+		glVertexAttribPointer(
+				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+				3,                  // size
+				GL_FLOAT,           // type
+				GL_FALSE,           // normalized?
+				0,                  // stride
+				(void*)0            // array buffer offset
+				);
 
-        // Draw the triangle !
-        glDrawArrays(GL_TRIANGLES, 0, 3); // 3 indices starting at 0 -> 1 triangle
+		// Draw the triangle !
+		glDrawArrays(GL_TRIANGLES, 0, 3); // 3 indices starting at 0 -> 1 triangle
 
-        glDisableVertexAttribArray(0);
-		
-
+		glDisableVertexAttribArray(0);
 
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-		
+
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-		   glfwWindowShouldClose(window) == 0 );
+			glfwWindowShouldClose(window) == 0 );
 
 
 	releaseCamera();
 
-    // Cleanup VBO
-    glDeleteBuffers(1, &vertexbuffer);
-    glDeleteVertexArrays(1, &VertexArrayID);
+	// Cleanup VBO
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteVertexArrays(1, &VertexArrayID);
 
 
 	glDeleteProgram(programID);
