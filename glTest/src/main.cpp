@@ -23,15 +23,6 @@ using namespace glm;
 #include <iostream>
 #include <ctime>
 
-/*
-#include <opencv2/highgui.hpp>
-#include <opencv2/calib3d.hpp>
-#include <opencv2/aruco/charuco.hpp>
-#include <opencv2/imgproc.hpp>
-#include "opencv2/calib3d/calib3d.hpp"
-#include <opencv2/aruco.hpp>
-*/
-
 using namespace std;
 using namespace cv;
 
@@ -71,54 +62,6 @@ vector< Mat > rvecs, tvecs;
 
 
 HsCamera hsCam;
-
-//Mat camMatrix, distCoeffs;
-
-/*
-   bool initCamera(char *paramFile) {
-//FileStorage fs("../../markViewer/build/output.txt",FileStorage::READ);
-FileStorage fs("./output.txt",FileStorage::READ);
-if(!fs.isOpened()) {
-return false;
-}
-fs["camera_matrix"] >> camMatrix;
-fs["distortion_coefficients"] >> distCoeffs;
-
-inputVideo.open(camId);
-if(!inputVideo.isOpened()) {
-printf("Video open error...\n");
-} else {
-printf("Video open Success...\n");
-}
-waitTime = 10;
-
-printf("[%s] is OK!!!\n", __func__);
-return true;
-}
- */
-
-
-/*
-bool getCameraImage(cv::Mat &src) {
-
-
-	return false;
-}
-*/
-
-
-/*
-// releaseCamera 는 지금은 안쓰도록
-void releaseCamera() {
-	if(inputVideo.isOpened()) {
-		inputVideo.release();
-		printf("Released VideoCapture.\n");
-	}
-
-	//release VideoCapture
-	// delete pVideoCapture;
-}
-*/
 
 
 int main( void ) {
@@ -241,22 +184,11 @@ int main( void ) {
 		///////////////////////////////////////////////////////////////////
 
 
-//d		glm::mat4 camPose = glm::mat4(0.0f);
-
-		// CV vector -> glm Vector converting.
-//d		glm::mat4 myView = glm::mat4(1.0f);
-//d		glm::vec3 axis = glm::vec3(0, 1, 0);
-
 		// Model matrix : an identity matrix (model will be at the origin)
 		glm::mat4 Model      = glm::mat4(1.0f);
 		glm::mat4 MVP        = Projection * myCam * Model; // Remember, matrix multiplication is the other way around
 
 
-		//if(pUsbCam->getNewImage() && pUsbCam->getCameraPose(tvec, rvec)) {
-		//OpenGL camera position setting.
-		//}
-
-		//printf("drawing triangle.\n");
 
 		// Send our transformation to the currently bound shader,
 		// in the "MVP" uniform

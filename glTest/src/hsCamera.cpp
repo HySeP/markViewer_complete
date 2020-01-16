@@ -117,7 +117,7 @@ bool HsCamera::getCameraImage(cv::Mat & src, glm::mat4 &camPose, vector<cv::Poin
 
 		imshow("out", imageCopy);
 		char key = (char)waitKey(waitTime);
-		if (key == 27) return 0;
+		if (key == 27) exit(0);
 		if (key == 'c' && ids.size() > 0) {
 			cout << "Frame captured" << endl;
 			allCorners.push_back(corners);
