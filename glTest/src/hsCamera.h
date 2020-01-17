@@ -55,4 +55,12 @@ vector< Mat > rvecs, tvecs;
 		bool releaseCamera();
 };
 
+class GLcamera {
+	private:
+	protected:
+	public:
+		GLcamera();
+		virtual ~ GLcamera();
+};
+
 #endif
