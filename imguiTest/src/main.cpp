@@ -49,6 +49,10 @@ static void glfw_error_callback(int error, const char* description)
 
 int main(int, char**)
 {
+
+	int camId = 0;
+	int markId = 0;
+
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -131,6 +135,8 @@ int main(int, char**)
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	static float f = 0.5f;
+	static int counter = 0;
 
 //////////////////////////////////////////
 	HsCamera hsCam;
@@ -138,10 +144,15 @@ int main(int, char**)
 	glm::mat4 matView = glm::mat4(0.0f);
 	
 	//openGL shader create
-	GLuint programID = LoadShaders("../shader/SimpleVertexShader.vertexshader", "../shader/SimpleFragmentShader.fragmentshader");
+    GLuint VertexArrayID;
+    glGenVertexArrays(1, &VertexArrayID);
+    glBindVertexArray(VertexArrayID);
+	
+	GLuint programID = LoadShaders("./shader/SimpleVertexShader.vertexshader", "./shader/SimpleFragmentShader.fragmentshader");
 
+	//makeTri(vertexbuffer)
 
-
+	cv::Mat src; 
 	
 
 
@@ -166,8 +177,8 @@ int main(int, char**)
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
-            static float f = 0.0f;
-            static int counter = 0;
+           // static float f = 0.0f;
+           // static int counter = 0;
 
             ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
@@ -197,6 +208,8 @@ int main(int, char**)
                 show_another_window = false;
             ImGui::End();
         }
+
+	//	if(!hsCam->getCameraImage(src, myCam, markerCorners3d)) continue;
 
         // Rendering
         ImGui::Render();

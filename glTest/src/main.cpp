@@ -17,6 +17,7 @@ using namespace glm;
 #include "shader.hpp"
 
 #include "hsCamera.h"
+#include "hsGL.h"
 
 #include <vector>
 #include <iostream>
@@ -24,8 +25,8 @@ using namespace glm;
 
 using namespace std;
 using namespace cv;
-
-void CleanVBO(unsigned int vertexbuffer, unsigned int VertexArrayID, unsigned int programID) {
+/*
+bool CleanVBO(unsigned int vertexbuffer, unsigned int VertexArrayID, unsigned int programID) {
     glDeleteBuffers(1, &vertexbuffer);
     glDeleteVertexArrays(1, &VertexArrayID);
 
@@ -33,7 +34,7 @@ void CleanVBO(unsigned int vertexbuffer, unsigned int VertexArrayID, unsigned in
 
 }
 
-void makeTri(unsigned int vertexbuffer) {
+bool makeTri(unsigned int vertexbuffer) {
 
         // 1rst attribute buffer : vertices
         glClear(GL_COLOR_BUFFER_BIT);
@@ -59,7 +60,7 @@ void makeTri(unsigned int vertexbuffer) {
 }
 
 
-void makeGL(void) {
+bool makeGL(void) {
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_RESIZABLE,GL_FALSE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -73,7 +74,7 @@ void makeGL(void) {
         fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
         getchar();
         glfwTerminate();
-        return exit(1);
+        return 0;
     }
     glfwMakeContextCurrent(window);
 
@@ -82,12 +83,13 @@ void makeGL(void) {
         fprintf(stderr, "Failed to initialize GLEW\n");
         getchar();
         glfwTerminate();
-        return exit(1);
+        return 0;
     }
 
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 }
+*/
 
 
 
@@ -99,9 +101,14 @@ int main( void ) {
 		return 0;
 	}
 
-	makeGL();
+	if(!makeGL()) return 0;
 
 	HsCamera *pUsbCam = new HsCamera();
+	HsGL *glCam = new HsGL();
+
+
+    if(!glCam->makeGL()) return 0;
+
 
 	// Dark blue background
 	glClearColor(0.0f, 0.40f, 0.0f, 0.0f);
@@ -181,7 +188,7 @@ int main( void ) {
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
 		//make triangle
-		makeTri(vertexbuffer);
+		if(!glCam->makeTri(vertexbuffer)) continue;
 
 	} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
@@ -193,7 +200,7 @@ int main( void ) {
 
 	// Cleanup VBO
 
-	CleanVBO(vertexbuffer, VertexArrayID, programID);
+	if(!glCam->CleanVBO(vertexbuffer, VertexArrayID, programID)) return 0;
 
 	delete pUsbCam;
 	printf("deleted pUsbCam object.\n");
