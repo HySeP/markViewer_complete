@@ -19,11 +19,13 @@
 #include <GL/glew.h>    // Initialize with glewInit()
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
 #include <glad/glad.h>  // Initialize with gladLoadGL()
+/*
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING)
 #define GLFW_INCLUDE_NONE         // GLFW including OpenGL headers causes ambiguity or multiple definition errors.
 #include <glbinding/glbinding.h>  // Initialize with glbinding::initialize()
 #include <glbinding/gl/gl.h>
-using namespace gl;
+*/
+//using namespace gl;
 #else
 #include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
 #endif
@@ -38,8 +40,9 @@ using namespace gl;
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+#include "hsAssimp.h"
 #include "hsCamera.h"
-
+#include "hsGL.h"
 
 
 static void glfw_error_callback(int error, const char* description)
@@ -139,6 +142,7 @@ int main(int, char**)
 	static int counter = 0;
 
 //////////////////////////////////////////
+/*
 	HsCamera hsCam;
 
 	glm::mat4 matView = glm::mat4(0.0f);
@@ -147,8 +151,8 @@ int main(int, char**)
     GLuint VertexArrayID;
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
-	
-	GLuint programID = LoadShaders("./shader/SimpleVertexShader.vertexshader", "./shader/SimpleFragmentShader.fragmentshader");
+*/	
+//	GLuint programID = LoadShaders("./shader/SimpleVertexShader.vertexshader", "./shader/SimpleFragmentShader.fragmentshader");
 
 	//makeTri(vertexbuffer)
 
@@ -208,6 +212,7 @@ int main(int, char**)
                 show_another_window = false;
             ImGui::End();
         }
+
 
 	//	if(!hsCam->getCameraImage(src, myCam, markerCorners3d)) continue;
 

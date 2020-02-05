@@ -27,13 +27,14 @@ find_package( glm REQUIRED )
 message(STATUS "GLM included at ${GLM_INCLUDE_DIRS}")
 
 # extra library path.
-set(imgui ../../libs/imgui_190703)
-set(gl3w ../../libs/gl3w_190703)
-set(stb ../../libs/stb_190703)
+set(imgui ../libs/imgui_190703)
+set(gl3w ../libs/gl3w_190703)
+set(stb ../libs/stb_190703)
+
 
 #https://github.com/opengl-tutorials/ogl.git
-set(oglTutorial ../../ogl/common)
-set(imgui ../../imgui)
+#set(oglTutorial ../../ogl/common)
+#set(imgui ../../imgui)
 
 #set(SyeCommon ../../SyeCommon)
 
