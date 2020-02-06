@@ -18,16 +18,16 @@ HsCamera::HsCamera() {
 HsCamera::~HsCamera() {
 }
 
-void HsCamera::realease() {
+void HsCamera::close() {
 	inputVideo.release();
 }
 
-void HsCamera::init(int get_camNum){
+bool HsCamera::init(int get_camNum){
 	if(inputVideo.open(get_camNum)) {
 		camNum = get_camNum;
 	}
 
-	return flase;
+	return false;
 }
 
 bool HsCamera::getCam(cv:: Mat &img) {
@@ -50,7 +50,7 @@ bool HsCamera::getArucoMarkers(cv::Mat img, vector< int > &ids, vector< vector< 
 }
 
 
-bool hsCamera::getMarkerPose(int markId, glm::mat4 &camPose, cv::Mat &img, int cols) {
+bool HsCamera::getMarkerPose(int markId, glm::mat4 &camPose, cv::Mat &img, int cols) {
 	int i;
 	cv::Mat imgOri;
 	cv::Mat matRvec, matTvec, matR;
@@ -60,7 +60,7 @@ bool hsCamera::getMarkerPose(int markId, glm::mat4 &camPose, cv::Mat &img, int c
 	vector< int > ids;
 	vector< vector< Point2f > > corners;
 
-	if(!getCamImage(imgOri) || imgOri.empty()) return false;
+	if(!getCam(imgOri) || imgOri.empty()) return false;
 	if(!getArucoMarkers(imgOri, ids, corners)) return false;
 
 
@@ -128,7 +128,7 @@ bool hsCamera::getMarkerPose(int markId, glm::mat4 &camPose, cv::Mat &img, int c
 GLcamera::GLcamera() {
 }
 
-GLCamera::~GLcamera() {
+GLcamera::~GLcamera() {
 }
 
 
