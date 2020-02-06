@@ -50,7 +50,7 @@ bool HsCamera::getArucoMarkers(cv::Mat img, vector< int > &ids, vector< vector< 
 }
 
 
-bool KCvCamera::getMarkerPose(int markId, glm::mat4 &camPose, cv::Mat &img, int cols) {
+bool hsCamera::getMarkerPose(int markId, glm::mat4 &camPose, cv::Mat &img, int cols) {
 	int i;
 	cv::Mat imgOri;
 	cv::Mat matRvec, matTvec, matR;
