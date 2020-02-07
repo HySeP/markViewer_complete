@@ -93,7 +93,6 @@ bool makeGL(void) {
 */
 
 
-
 int main( void ) {
 	// Initialise GLFW
 	if( !glfwInit() ) {
