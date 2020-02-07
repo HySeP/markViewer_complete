@@ -25,6 +25,7 @@ using namespace glm;
 
 using namespace std;
 using namespace cv;
+
 /*
 bool CleanVBO(unsigned int vertexbuffer, unsigned int VertexArrayID, unsigned int programID) {
     glDeleteBuffers(1, &vertexbuffer);
