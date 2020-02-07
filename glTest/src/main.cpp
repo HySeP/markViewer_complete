@@ -60,7 +60,6 @@ bool makeTri(unsigned int vertexbuffer) {
         glfwPollEvents();
 }
 
-
 bool makeGL(void) {
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_RESIZABLE,GL_FALSE);
@@ -106,9 +105,7 @@ int main( void ) {
 	HsCamera *pUsbCam = new HsCamera();
 	HsGL *glCam = new HsGL();
 
-
     if(!glCam->makeGL()) return 0;
-
 
 	// Dark blue background
 	glClearColor(0.0f, 0.40f, 0.0f, 0.0f);
@@ -118,10 +115,10 @@ int main( void ) {
 	glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
-	printf("11111111111\n");
+	printf("11111111\n");
     GLuint programID = LoadShaders( "../shader/SimpleVertexShader.vertexshader", "../shader/SimpleFragmentShader.fragmentshader" );
     //GLuint programID = LoadShaders( "../src/SimpleVertexShader.vertexshader", "../src/SimpleFragmentShader.fragmentshader" );
-	printf("22222222222\n");
+	printf("22222222\n");
 
 	// Get a handle for our "MVP" uniform
     GLuint MatrixID = glGetUniformLocation(programID, "MVP");

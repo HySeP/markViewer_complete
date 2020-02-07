@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
 	//Get calibration datas.
 	Mat camMatrix, distCoeffs;
 
-	FileStorage fs("output.txt", FileStorage::READ);
+	FileStorage fs("../output.txt", FileStorage::READ);
 	if (!fs.isOpened())
 		return false;
 	fs["camera_matrix"] >> camMatrix;
