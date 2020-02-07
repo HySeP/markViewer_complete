@@ -55,6 +55,7 @@ void test1(void) {
 }
 
 void test2(void) {
+	printf("22222222222\n");
 }
 
 int main(int, char**)
