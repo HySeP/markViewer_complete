@@ -57,13 +57,14 @@ void test1(void) {
 }
 
 void test2(void) {
+	printf("22222222222\n");
 }
 
 int main(int, char**)
 {
 
 	int camId = 0;
-	int markId = 0;
+	int markId = 8;
 
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
@@ -151,16 +152,14 @@ int main(int, char**)
 	static int counter = 0;
 
 //////////////////////////////////////////
-/*
+
 	HsCamera hsCam;
+	hsGL glCam;
 
 	glm::mat4 matView = glm::mat4(0.0f);
 	
 	//openGL shader create
-    GLuint VertexArrayID;
-    glGenVertexArrays(1, &VertexArrayID);
-    glBindVertexArray(VertexArrayID);
-*/	
+	
 //	GLuint programID = LoadShaders("./shader/SimpleVertexShader.vertexshader", "./shader/SimpleFragmentShader.fragmentshader");
 
 	//makeTri(vertexbuffer)
