@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
 	Ptr<aruco::DetectorParameters> detectorParams = aruco::DetectorParameters::create();
 
 	bool refindStrategy =true;
-	int camId = 2;
+	int camId = 0;
 
 
 
