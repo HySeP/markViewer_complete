@@ -33,6 +33,7 @@ bool HsCamera::init(int get_camNum){
 bool HsCamera::getCam(cv:: Mat &img) {
 	if(isOpened()) {
 		inputVideo >> img;
+		return true;
 	}
 	return false;
 }

@@ -50,6 +50,7 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
+/*
 void test1(void) {
 	printf("11111111111111\n");
 	//Add code more...
@@ -59,6 +60,7 @@ void test1(void) {
 void test2(void) {
 	printf("22222222222\n");
 }
+*/
 
 int main(int, char**)
 {
@@ -154,17 +156,23 @@ int main(int, char**)
 //////////////////////////////////////////
 
 	HsCamera hsCam;
-	hsGL glCam;
 
 	glm::mat4 matView = glm::mat4(0.0f);
 	
 	//openGL shader create
-	
-//	GLuint programID = LoadShaders("./shader/SimpleVertexShader.vertexshader", "./shader/SimpleFragmentShader.fragmentshader");
+	//	GLuint programID = LoadShaders("./shader/SimpleVertexShader.vertexshader", "./shader/SimpleFragmentShader.fragmentshader");
 
 	//makeTri(vertexbuffer)
 
 	cv::Mat src; 
+	unsigned int CamImgId = 0;
+	glGenTextures(1, &CamImgId);
+
+	if(!hsCam.init(camId)){
+	}
+
+	namedWindow("CAM", WINDOW_NORMAL);
+	resizeWindow("CAM", 640,480);
 	
 
 
@@ -221,8 +229,20 @@ int main(int, char**)
             ImGui::End();
         }
 
+///////////////////////////////////////////////////////////////////
+		if(hsCam.getCam(src)){
+			if(hsCam.isOpened() && hsCam.getMarkerPose(markId, matView, src)) {
+				matView[3][2] *= f;
+			} else {
+				matView = glm::mat4(1.0f);
+				matView[3][2] = -100.0f;
+			}
+			imshow("CAM", src);
+			waitKey(1);
+		}
 
-	//	if(!hsCam->getCameraImage(src, myCam, markerCorners3d)) continue;
+
+
 
         // Rendering
         ImGui::Render();
