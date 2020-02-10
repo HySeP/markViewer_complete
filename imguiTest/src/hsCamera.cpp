@@ -85,6 +85,10 @@ bool HsCamera::getMarkerPose(int markId, glm::mat4 &camPose, cv::Mat &img, int c
 		if(ids[i] == markId) {
 			// get tvec, rvec
 			solvePnP(markerCorners3d, m, camMatrix, distCoeffs, matRvec, matTvec);
+			cout << "markerID: " << ids[i] << endl;
+            cout << "rotation_vector: " << endl << matRvec << endl;
+            cout << "translation_vector: " << endl << matTvec << endl;
+
 			aruco::drawAxis(imgOri, camMatrix, distCoeffs, matRvec, matTvec, 1.0);
 
 			cv::Rodrigues(matRvec, matR);

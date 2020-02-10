@@ -233,7 +233,8 @@ int main(int, char**)
 		if(hsCam.getCam(src)){
 			if(hsCam.isOpened() && hsCam.getMarkerPose(markId, matView, src)) {
 				matView[3][2] *= f;
-				printf("-----[%d]-----\n", markId);
+
+
 			} else {
 				matView = glm::mat4(1.0f);
 				matView[3][2] = -100.0f;
@@ -241,9 +242,6 @@ int main(int, char**)
 			imshow("CAM", src);
 			waitKey(1);
 		}
-
-
-
 
         // Rendering
         ImGui::Render();
@@ -253,6 +251,15 @@ int main(int, char**)
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		
+
+		// Draw background /////////////////
+
+
+
+
+
+
 
         glfwSwapBuffers(window);
 
