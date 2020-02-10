@@ -67,7 +67,7 @@ bool HsCamera::getMarkerPose(int markId, glm::mat4 &camPose, cv::Mat &img, int c
 
 	// read calibration info
 	Mat camMatrix, distCoeffs;
-	FileStorage fs("./output.txt", FileStorage::READ);
+	FileStorage fs("../output.txt", FileStorage::READ);
 	if (!fs.isOpened()) return false;
 	fs["camera_matrix"] >> camMatrix;
 	fs["distortion_coefficients"] >> distCoeffs;
@@ -118,6 +118,7 @@ bool HsCamera::getMarkerPose(int markId, glm::mat4 &camPose, cv::Mat &img, int c
 			aruco::drawAxis(imgOri, camMatrix, distCoeffs, matRvec_tmp, matTvec_tmp, 1.0);	
 		}
 		*/
+		
 	}
 
 	// 좌표축 그린 이미지 
