@@ -160,9 +160,13 @@ int main(int, char**)
 	glm::mat4 matView = glm::mat4(0.0f);
 	
 	//openGL shader create
-	//	GLuint programID = LoadShaders("./shader/SimpleVertexShader.vertexshader", "./shader/SimpleFragmentShader.fragmentshader");
 
-	//makeTri(vertexbuffer)
+	SYE::Shader shaderTriangle("../shader/SimpleVertexShader.vertexshader", "../shader/SimpleFragmentShader.fragmentshader");
+
+	glObject objTri;
+	objTri.initialize(&shaderTriangle, objTriangle);
+
+
 
 	cv::Mat src; 
 	unsigned int CamImgId = 0;
@@ -254,6 +258,13 @@ int main(int, char**)
 		
 
 		// Draw background /////////////////
+
+		glm::mat4 matProj = glm::perspective(45.0f, (float)display_w / (float)display_h, 0.1f, 1000.0f);
+
+
+		objTri.render(matView, matProj);
+
+
 
 
 
