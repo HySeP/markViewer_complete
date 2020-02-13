@@ -38,6 +38,7 @@ class glGrid: public glBase {
 				, glm::vec3 color = glm::vec3(0.7f, 0.7f, 0.7f)
 				);
 		virtual ~glGrid();
+
 		void render(glm::mat4 view, glm::mat4 proj);
 };
 
@@ -49,6 +50,14 @@ enum glObjectType {
 	KObjCircle,
 	KObEtc,
 	*/
+};
+
+class HsGlGrid: public glBase {
+	private:
+	protected:
+	public:
+		HsGlGrid();
+		virtual ~HsGlGrid();
 };
 
 class glObject: public glBase {

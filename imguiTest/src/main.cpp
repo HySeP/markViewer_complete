@@ -175,10 +175,13 @@ int main(int, char**)
 	resizeWindow("CAM", 640,480);
 	
 
+	// Grid object.
+	SYE::Shader shaderGrid("../shader/grid.vs", "../shader/grid.fs");
+	glGrid grid(&shaderGrid);
+
 
     // Main loop
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)) {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -220,8 +223,7 @@ int main(int, char**)
         }
 
         // 3. Show another simple window.
-        if (show_another_window)
-        {
+        if (show_another_window) {
             ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
             ImGui::Text("Hello from another window!");
             if (ImGui::Button("Close Me"))
@@ -229,20 +231,20 @@ int main(int, char**)
             ImGui::End();
         }
 
-///////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////////////////
+
 		if(hsCam.getCam(src)){
 			if(hsCam.isOpened() && hsCam.getMarkerPose(markId, matView, src)) {
 				matView[3][2] *= f;
 				printf("-----[%d]-----\n", markId);
 			} else {
 				matView = glm::mat4(1.0f);
-				matView[3][2] = -100.0f;
+				matView[3][2] = -10.0f;
 			}
 			imshow("CAM", src);
 			waitKey(1);
+		} else {
 		}
-
-
 
 
         // Rendering
@@ -252,8 +254,14 @@ int main(int, char**)
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+		glm::mat4 matProj = glm::perspective(45.0f, (float)display_w / (float)display_h, 0.1f, 1000.0f);
+
+
+		//drawBackground();
+		grid.render(matView, matProj);
+
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
 
 		if(waitKey(10) == 27) break;
