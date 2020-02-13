@@ -257,7 +257,6 @@ int main(int, char**)
 
 		glm::mat4 matProj = glm::perspective(45.0f, (float)display_w / (float)display_h, 0.1f, 1000.0f);
 
-
 		//drawBackground();
 		grid.render(matView, matProj);
 
