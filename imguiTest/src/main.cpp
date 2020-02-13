@@ -160,9 +160,14 @@ int main(int, char**)
 	glm::mat4 matView = glm::mat4(0.0f);
 	
 	//openGL shader create
-	//	GLuint programID = LoadShaders("./shader/SimpleVertexShader.vertexshader", "./shader/SimpleFragmentShader.fragmentshader");
 
-	//makeTri(vertexbuffer)
+	SYE::Shader shaderTriangle("../shader/SimpleVertexShader.vertexshader", "../shader/SimpleFragmentShader.fragmentshader");
+
+
+	glObject objTri;
+	objTri.initialize(&shaderTriangle, objTriangle);
+
+
 
 	cv::Mat src; 
 	unsigned int CamImgId = 0;
@@ -175,13 +180,10 @@ int main(int, char**)
 	resizeWindow("CAM", 640,480);
 	
 
-	// Grid object.
-	SYE::Shader shaderGrid("../shader/grid.vs", "../shader/grid.fs");
-	glGrid grid(&shaderGrid);
-
 
     // Main loop
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -223,7 +225,8 @@ int main(int, char**)
         }
 
         // 3. Show another simple window.
-        if (show_another_window) {
+        if (show_another_window)
+        {
             ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
             ImGui::Text("Hello from another window!");
             if (ImGui::Button("Close Me"))
@@ -231,23 +234,19 @@ int main(int, char**)
             ImGui::End();
         }
 
-		///////////////////////////////////////////////////////////////////
-
-		matView = glm::mat4(1.0f);
-		matView[3][2] = -10.0f;
-		if(hsCam.getCam(src)) {
+///////////////////////////////////////////////////////////////////
+		if(hsCam.getCam(src)){
 			if(hsCam.isOpened() && hsCam.getMarkerPose(markId, matView, src)) {
-				//matView[3][2] *= f;
-				//printf("-----[%d]-----\n", markId);
+				matView[3][2] *= f;
+
+
 			} else {
 				matView = glm::mat4(1.0f);
-				matView[3][2] = -10.0f;
+				matView[3][2] = -100.0f;
 			}
 			imshow("CAM", src);
 			waitKey(1);
-		} else {
 		}
-
 
         // Rendering
         ImGui::Render();
@@ -256,14 +255,41 @@ int main(int, char**)
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		
+
+		/*
+		GLuint vertexbuffer;
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glVertexAttribPointer(
+                0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+                3,                  // size
+                GL_FLOAT,           // type
+                GL_FALSE,           // normalized?
+                0,                  // stride
+                (void*)0            // array buffer offset
+                );
+
+        // Draw the triangle !
+        glDrawArrays(GL_TRIANGLES, 0, 3); // 3 indices starting at 0 -> 1 triangle
+
+        glDisableVertexAttribArray(0);
+		*/
+
+
+		// Draw background /////////////////
 
 		glm::mat4 matProj = glm::perspective(45.0f, (float)display_w / (float)display_h, 0.1f, 1000.0f);
 
 
-		//drawBackground();
-		grid.render(matView, matProj);
 
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		objTri.render(matView, matProj);
+
+
+
+
+
         glfwSwapBuffers(window);
 
 		if(waitKey(10) == 27) break;
