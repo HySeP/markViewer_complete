@@ -233,10 +233,12 @@ int main(int, char**)
 
 		///////////////////////////////////////////////////////////////////
 
-		if(hsCam.getCam(src)){
+		matView = glm::mat4(1.0f);
+		matView[3][2] = -10.0f;
+		if(hsCam.getCam(src)) {
 			if(hsCam.isOpened() && hsCam.getMarkerPose(markId, matView, src)) {
-				matView[3][2] *= f;
-				printf("-----[%d]-----\n", markId);
+				//matView[3][2] *= f;
+				//printf("-----[%d]-----\n", markId);
 			} else {
 				matView = glm::mat4(1.0f);
 				matView[3][2] = -10.0f;
