@@ -154,9 +154,11 @@ void glObject::render(glm::mat4 view, glm::mat4 proj) {
 
 		glBindVertexArray(VAO);
 
+		
 		switch(this->type){
 			case objTriangle :
-			/*
+			
+		/*	
 			case objRectangle :
 				// GL_TRIANGLES
 				// GL_TRIANGLE_STRIP 
@@ -168,11 +170,12 @@ void glObject::render(glm::mat4 view, glm::mat4 proj) {
 			case obEtc :
 				glDrawArrays(GL_LINES, 0, vertices.size());
 				break;
-			*/
-
+			
+		*/
 			default :
 				break;
+			
 		}
-
 	}
 }
+
